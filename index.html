@@ -1,12 +1,6 @@
 const interceptLinks = (win: Window | null = window) => {
     if (!win) return;
 
-    // Assuming 'newTab' is defined somewhere
-    const newTab = (url: string, title: string) => {
-        window.open(url, title);
-    };
-
-    // Creating a proxy for win.open method
     win.open = new Proxy(win.open, {
         apply(_target: any, _thisArg: any, argArray: any[]) {
             if (argArray[0]) {
@@ -16,7 +10,6 @@ const interceptLinks = (win: Window | null = window) => {
         },
     });
 
-    // Handling clicks on <a> elements
     win.addEventListener("click", (e: MouseEvent) => {
         const target = e.target as HTMLElement;
         if (target.tagName === "A" && target.hasAttribute("href")) {
@@ -37,7 +30,7 @@ const interceptLinks = (win: Window | null = window) => {
     });
 };
 
-// Assuming you want to call it like this on an iframe's content window:
+
 const iframe = document.querySelector("iframe");
 if (iframe && iframe.contentWindow) {
     interceptLinks(iframe.contentWindow);
