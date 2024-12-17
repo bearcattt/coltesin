@@ -1,5 +1,44 @@
-<title>Cool site frfr</title>
-<h1>Cool site g</h1>
-<script>
-  window.href = "somethig"
-</script>
+const interceptLinks = (win: Window | null = window) => {
+    if (!win) return;
+
+    // Assuming 'newTab' is defined somewhere
+    const newTab = (url: string, title: string) => {
+        window.open(url, title);
+    };
+
+    // Creating a proxy for win.open method
+    win.open = new Proxy(win.open, {
+        apply(_target: any, _thisArg: any, argArray: any[]) {
+            if (argArray[0]) {
+                newTab(argArray[0], argArray[0]);
+            }
+            return;
+        },
+    });
+
+    // Handling clicks on <a> elements
+    win.addEventListener("click", (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (target.tagName === "A" && target.hasAttribute("href")) {
+            const isNewTab =
+                e.ctrlKey ||
+                e.shiftKey ||
+                (target.hasAttribute("target") &&
+                    target.getAttribute("target")?.includes("_blank"));
+
+            if (isNewTab) {
+                e.preventDefault();
+                const href = target.getAttribute("href");
+                if (href) {
+                    newTab(href, href);
+                }
+            }
+        }
+    });
+};
+
+// Assuming you want to call it like this on an iframe's content window:
+const iframe = document.querySelector("iframe");
+if (iframe && iframe.contentWindow) {
+    interceptLinks(iframe.contentWindow);
+}
